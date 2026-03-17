@@ -3,8 +3,21 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import Index from "./pages/Index.tsx";
-import NotFound from "./pages/NotFound.tsx";
+import { AuthProvider } from "@/contexts/AuthContext";
+import { BetSlipProvider } from "@/contexts/BetSlipContext";
+
+import Index from "./pages/Index";
+import Sports from "./pages/Sports";
+import Live from "./pages/Live";
+import Virtuals from "./pages/Virtuals";
+import Casino from "./pages/Casino";
+import Aviator from "./pages/Aviator";
+import Register from "./pages/Register";
+import Login from "./pages/Login";
+import Account from "./pages/Account";
+import Promotions from "./pages/Promotions";
+import Admin from "./pages/Admin";
+import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
@@ -14,11 +27,24 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+        <AuthProvider>
+          <BetSlipProvider>
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/sports" element={<Sports />} />
+              <Route path="/live" element={<Live />} />
+              <Route path="/virtuals" element={<Virtuals />} />
+              <Route path="/casino" element={<Casino />} />
+              <Route path="/aviator" element={<Aviator />} />
+              <Route path="/register" element={<Register />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/account" element={<Account />} />
+              <Route path="/promotions" element={<Promotions />} />
+              <Route path="/admin" element={<Admin />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BetSlipProvider>
+        </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
