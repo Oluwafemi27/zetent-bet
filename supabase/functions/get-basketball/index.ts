@@ -25,11 +25,16 @@ serve(async (req) => {
         if (res.ok) {
           const data = await res.json();
           for (const g of data.data || []) {
-            // Only upcoming or live (not Final)
-            const status = (g.status || '').toLowerCase();
-            const isFinal = status.includes('final');
-            if (isFinal) continue;
-            const isLive = !status.includes('et') && !status.includes('pm') && !status.includes('am') && status !== '' && !status.includes('scheduled');
+            const status: string = g.status || '';
+            const lower = status.toLowerCase();
+            // Skip finished games
+            if (lower.includes('final')) continue;
+            // If status is an ISO timestamp (not yet started), it parses as a valid date
+            const statusAsDate = new Date(status);
+            const isScheduledTimestamp = !isNaN(statusAsDate.getTime()) && status.includes('T');
+            // Live: status is something like "Qtr 2 5:23" or "Halftime" — not a timestamp, not Final, not empty
+            const isLive = !isScheduledTimestamp && !lower.includes('final') && status.trim() !== '' && !lower.includes('postponed');
+            const commenceTime = isScheduledTimestamp ? status : (g.date || '');
             games.push({
               id: `nba-${g.id}`,
               homeTeam: g.home_team.full_name,
@@ -37,8 +42,8 @@ serve(async (req) => {
               homeAbbr: g.home_team.abbreviation,
               awayAbbr: g.visitor_team.abbreviation,
               league: 'NBA',
-              commence_time: g.date || g.status,
-              status: g.status,
+              commence_time: commenceTime,
+              status: isLive ? status : undefined,
               isLive,
             });
           }
