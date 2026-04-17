@@ -5,3 +5,9 @@ verify_jwt = false
 
 [functions.get-fixtures]
 verify_jwt = false
+
+[functions.get-basketball]
+verify_jwt = false
+
+[functions.get-boxing]
+verify_jwt = false

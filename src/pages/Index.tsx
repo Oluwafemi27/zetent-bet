@@ -6,7 +6,7 @@ import { useOdds } from "@/hooks/useOddsApi";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { Link } from "react-router-dom";
-import { Zap, Trophy, Gamepad2 } from "lucide-react";
+import { Zap, Trophy, Gamepad2, Activity, Swords, Tv } from "lucide-react";
 
 const leagues = [
   { id: "all", label: "All" },
@@ -17,7 +17,10 @@ const leagues = [
 ];
 
 const quickLinks = [
-  { to: "/live", icon: Zap, label: "Live Betting", color: "bg-destructive" },
+  { to: "/live", icon: Zap, label: "Live", color: "bg-destructive" },
+  { to: "/basketball", icon: Activity, label: "Basketball", color: "bg-primary" },
+  { to: "/boxing", icon: Swords, label: "Boxing", color: "bg-naija-gold" },
+  { to: "/watch", icon: Tv, label: "Watch", color: "bg-secondary text-foreground" },
   { to: "/aviator", icon: Trophy, label: "Aviator", color: "bg-naija-gold" },
   { to: "/casino", icon: Gamepad2, label: "Casino", color: "bg-primary" },
 ];
@@ -27,16 +30,19 @@ const Index = () => {
   const sportKey = activeLeague === "all" ? "soccer_epl" : activeLeague;
   const { data: odds, isLoading } = useOdds(sportKey);
 
-  const matches = (odds || []).map((event: any) => ({
-    id: event.id,
-    homeTeam: event.home_team,
-    awayTeam: event.away_team,
-    homeOdds: event.bookmakers?.[0]?.markets?.[0]?.outcomes?.find((o: any) => o.name === event.home_team)?.price || 1.5,
-    drawOdds: event.bookmakers?.[0]?.markets?.[0]?.outcomes?.find((o: any) => o.name === "Draw")?.price || 3.5,
-    awayOdds: event.bookmakers?.[0]?.markets?.[0]?.outcomes?.find((o: any) => o.name === event.away_team)?.price || 2.5,
-    league: event.sport_title,
-    time: new Date(event.commence_time).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-  }));
+  const now = Date.now();
+  const matches = (odds || [])
+    .filter((event: any) => new Date(event.commence_time).getTime() > now - 3 * 60 * 60 * 1000)
+    .map((event: any) => ({
+      id: event.id,
+      homeTeam: event.home_team,
+      awayTeam: event.away_team,
+      homeOdds: event.bookmakers?.[0]?.markets?.[0]?.outcomes?.find((o: any) => o.name === event.home_team)?.price || 1.5,
+      drawOdds: event.bookmakers?.[0]?.markets?.[0]?.outcomes?.find((o: any) => o.name === "Draw")?.price || 3.5,
+      awayOdds: event.bookmakers?.[0]?.markets?.[0]?.outcomes?.find((o: any) => o.name === event.away_team)?.price || 2.5,
+      league: event.sport_title,
+      time: new Date(event.commence_time).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+    }));
 
   return (
     <Layout>

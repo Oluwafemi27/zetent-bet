@@ -12,6 +12,9 @@ import Live from "./pages/Live";
 import Virtuals from "./pages/Virtuals";
 import Casino from "./pages/Casino";
 import Aviator from "./pages/Aviator";
+import Basketball from "./pages/Basketball";
+import Boxing from "./pages/Boxing";
+import WatchLive from "./pages/WatchLive";
 import Register from "./pages/Register";
 import Login from "./pages/Login";
 import Account from "./pages/Account";
@@ -36,6 +39,9 @@ const App = () => (
               <Route path="/virtuals" element={<Virtuals />} />
               <Route path="/casino" element={<Casino />} />
               <Route path="/aviator" element={<Aviator />} />
+              <Route path="/basketball" element={<Basketball />} />
+              <Route path="/boxing" element={<Boxing />} />
+              <Route path="/watch" element={<WatchLive />} />
               <Route path="/register" element={<Register />} />
               <Route path="/login" element={<Login />} />
               <Route path="/account" element={<Account />} />
