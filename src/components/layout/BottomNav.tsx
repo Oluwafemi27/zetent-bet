@@ -1,12 +1,12 @@
 import { Link, useLocation } from "react-router-dom";
-import { Home, Zap, Gamepad2, Dice5, UserCircle } from "lucide-react";
+import { Home, Zap, Tv, Dice5, UserCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useBetSlip } from "@/contexts/BetSlipContext";
 
 const navItems = [
   { to: "/", icon: Home, label: "Home" },
   { to: "/live", icon: Zap, label: "Live" },
-  { to: "/virtuals", icon: Gamepad2, label: "Virtuals" },
+  { to: "/watch", icon: Tv, label: "Watch" },
   { to: "/casino", icon: Dice5, label: "Casino" },
   { to: "/account", icon: UserCircle, label: "Account" },
 ];
