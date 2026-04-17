@@ -11,3 +11,6 @@ verify_jwt = false
 
 [functions.get-boxing]
 verify_jwt = false
+
+[functions.get-streams]
+verify_jwt = false
