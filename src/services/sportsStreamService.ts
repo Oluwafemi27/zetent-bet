@@ -102,50 +102,51 @@ export async function fetchMatches(category: string = "football"): Promise<Strea
 
 /**
  * Parse stream sources from match data
+ * Handles sportsrc.org API format with embedUrl, streamNo, hd, language fields
  */
 function parseStreamSources(match: any): StreamSource[] {
   const sources: StreamSource[] = [];
 
-  // If match has sources array, use it
+  // If match has sources array, map to our format
   if (Array.isArray(match.sources) && match.sources.length > 0) {
-    sources.push(...match.sources);
-  }
-
-  // If match has streamUrl or embed, add as primary source
-  if (match.streamUrl) {
-    sources.push({
-      url: match.streamUrl,
-      embed: match.streamUrl,
-      name: match.streamName || "Stream",
-      quality: match.streamQuality,
+    match.sources.forEach((source: any) => {
+      sources.push({
+        url: source.embedUrl || source.url || source.embed,
+        embed: source.embedUrl || source.url || source.embed,
+        name: source.name || `Stream ${source.streamNo || sources.length + 1}`,
+        language: source.language || undefined,
+        quality: source.hd ? "HD" : "SD",
+        source: source.source,
+      });
     });
   }
 
-  if (match.embed && !match.streamUrl) {
+  // Fallback: if no sources array but has embedUrl at top level
+  if (sources.length === 0 && match.embedUrl) {
     sources.push({
-      url: match.embed,
-      embed: match.embed,
+      url: match.embedUrl,
+      embed: match.embedUrl,
       name: "Stream",
+      quality: match.hd ? "HD" : "SD",
     });
   }
 
-  // Check for multiple quality variants
-  if (match.stream_hd) {
-    sources.push({
-      url: match.stream_hd,
-      embed: match.stream_hd,
-      name: "HD Stream",
-      quality: "HD",
-    });
-  }
-
-  if (match.stream_sd) {
-    sources.push({
-      url: match.stream_sd,
-      embed: match.stream_sd,
-      name: "SD Stream",
-      quality: "SD",
-    });
+  // Fallback: if no sources but has streamUrl or embed
+  if (sources.length === 0) {
+    if (match.streamUrl) {
+      sources.push({
+        url: match.streamUrl,
+        embed: match.streamUrl,
+        name: "Stream",
+        quality: match.streamQuality,
+      });
+    } else if (match.embed) {
+      sources.push({
+        url: match.embed,
+        embed: match.embed,
+        name: "Stream",
+      });
+    }
   }
 
   return sources;
