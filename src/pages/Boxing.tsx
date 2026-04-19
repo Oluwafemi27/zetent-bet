@@ -2,6 +2,7 @@ import Layout from "@/components/layout/Layout";
 import { Skeleton } from "@/components/ui/skeleton";
 import OddsButton from "@/components/OddsButton";
 import { useBoxing } from "@/hooks/useBoxing";
+import { formatGameDayOnly } from "@/utils/formatGameDay";
 import { Badge } from "@/components/ui/badge";
 import { Swords } from "lucide-react";
 
@@ -28,7 +29,7 @@ const Boxing = () => {
               const homeOdds = 1.75;
               const awayOdds = 2.10;
               const dateLabel = e.timestamp
-                ? new Date(e.timestamp).toLocaleString([], { weekday: "short", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })
+                ? formatGameDayOnly(e.timestamp)
                 : `${e.date || ""} ${e.time || ""}`;
               return (
                 <div key={e.id} className="overflow-hidden rounded-xl border border-border bg-card">

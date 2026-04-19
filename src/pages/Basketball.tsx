@@ -2,6 +2,7 @@ import Layout from "@/components/layout/Layout";
 import MatchSkeleton from "@/components/MatchSkeleton";
 import OddsButton from "@/components/OddsButton";
 import { useBasketball } from "@/hooks/useBasketball";
+import { formatGameDay } from "@/utils/formatGameDay";
 import { Badge } from "@/components/ui/badge";
 import { Activity } from "lucide-react";
 
@@ -36,7 +37,7 @@ const Basketball = () => {
                         </Badge>
                       )}
                       <span className="text-xs text-muted-foreground">
-                        {g.status || new Date(g.commence_time).toLocaleString([], { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}
+                        {g.status || formatGameDay(g.commence_time)}
                       </span>
                     </div>
                   </div>

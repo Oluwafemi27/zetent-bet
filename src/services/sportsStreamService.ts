@@ -1,6 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 
-export type StreamTopic = "nba" | "boxing";
+export type StreamTopic = "nba" | "boxing" | "soccer";
 
 export interface LiveStreamResult {
   id: string;
@@ -19,6 +19,11 @@ export const liveStreamTopics: Array<{ id: StreamTopic; label: string; query: st
     query: "NBA basketball live",
   },
   {
+    id: "soccer",
+    label: "Football",
+    query: "football soccer live match",
+  },
+  {
     id: "boxing",
     label: "Boxing",
     query: "boxing live",
@@ -30,6 +35,7 @@ const topicQueryMap = liveStreamTopics.reduce<Record<StreamTopic, string>>((acc,
   return acc;
 }, {
   nba: "NBA basketball live",
+  soccer: "football soccer live match",
   boxing: "boxing live",
 });
 

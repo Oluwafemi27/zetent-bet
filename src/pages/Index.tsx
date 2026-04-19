@@ -3,10 +3,11 @@ import HeroBanner from "@/components/HeroBanner";
 import MatchCard from "@/components/MatchCard";
 import MatchSkeleton from "@/components/MatchSkeleton";
 import { useOdds } from "@/hooks/useOddsApi";
+import { formatGameDay } from "@/utils/formatGameDay";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { Link } from "react-router-dom";
-import { Zap, Trophy, Gamepad2, Activity, Swords, Tv } from "lucide-react";
+import { Zap, Trophy, Gamepad2, Activity, Swords, Tv, Clock } from "lucide-react";
 
 const leagues = [
   { id: "all", label: "All" },
@@ -17,12 +18,12 @@ const leagues = [
 ];
 
 const quickLinks = [
+  { to: "/my-bets", icon: Clock, label: "My Bets", color: "bg-primary" },
   { to: "/live", icon: Zap, label: "Live", color: "bg-destructive" },
   { to: "/basketball", icon: Activity, label: "Basketball", color: "bg-primary" },
   { to: "/boxing", icon: Swords, label: "Boxing", color: "bg-naija-gold" },
   { to: "/watch", icon: Tv, label: "Watch", color: "bg-secondary text-foreground" },
   { to: "/aviator", icon: Trophy, label: "Aviator", color: "bg-naija-gold" },
-  { to: "/casino", icon: Gamepad2, label: "Casino", color: "bg-primary" },
 ];
 
 const Index = () => {
@@ -42,6 +43,7 @@ const Index = () => {
       awayOdds: event.bookmakers?.[0]?.markets?.[0]?.outcomes?.find((o: any) => o.name === event.away_team)?.price || 2.5,
       league: event.sport_title,
       time: new Date(event.commence_time).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+      dayLabel: formatGameDay(event.commence_time),
     }));
 
   return (

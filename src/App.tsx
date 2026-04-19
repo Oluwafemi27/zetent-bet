@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { BetSlipProvider } from "@/contexts/BetSlipContext";
+import { PlacedBetsProvider } from "@/contexts/PlacedBetsContext";
 
 import Index from "./pages/Index";
 import Sports from "./pages/Sports";
@@ -20,6 +21,8 @@ import Login from "./pages/Login";
 import Account from "./pages/Account";
 import Promotions from "./pages/Promotions";
 import Admin from "./pages/Admin";
+import MyBets from "./pages/MyBets";
+import BetHistory from "./pages/BetHistory";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -31,25 +34,29 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <AuthProvider>
-          <BetSlipProvider>
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/sports" element={<Sports />} />
-              <Route path="/live" element={<Live />} />
-              <Route path="/virtuals" element={<Virtuals />} />
-              <Route path="/casino" element={<Casino />} />
-              <Route path="/aviator" element={<Aviator />} />
-              <Route path="/basketball" element={<Basketball />} />
-              <Route path="/boxing" element={<Boxing />} />
-              <Route path="/watch" element={<WatchLive />} />
-              <Route path="/register" element={<Register />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/account" element={<Account />} />
-              <Route path="/promotions" element={<Promotions />} />
-              <Route path="/admin" element={<Admin />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </BetSlipProvider>
+          <PlacedBetsProvider>
+            <BetSlipProvider>
+              <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="/sports" element={<Sports />} />
+                <Route path="/live" element={<Live />} />
+                <Route path="/virtuals" element={<Virtuals />} />
+                <Route path="/casino" element={<Casino />} />
+                <Route path="/aviator" element={<Aviator />} />
+                <Route path="/basketball" element={<Basketball />} />
+                <Route path="/boxing" element={<Boxing />} />
+                <Route path="/watch" element={<WatchLive />} />
+                <Route path="/register" element={<Register />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/account" element={<Account />} />
+                <Route path="/promotions" element={<Promotions />} />
+                <Route path="/admin" element={<Admin />} />
+                <Route path="/my-bets" element={<MyBets />} />
+                <Route path="/bet-history" element={<BetHistory />} />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </BetSlipProvider>
+          </PlacedBetsProvider>
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>

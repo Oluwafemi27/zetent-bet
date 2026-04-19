@@ -1,12 +1,14 @@
 import { Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
-import { Wallet, Search } from "lucide-react";
+import { Wallet, Search, Clock } from "lucide-react";
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
+import { usePlacedBets } from "@/contexts/PlacedBetsContext";
 
 const Header = () => {
   const { user, profile } = useAuth();
+  const { currentBets } = usePlacedBets();
   const [showSearch, setShowSearch] = useState(false);
 
   return (
@@ -31,10 +33,21 @@ const Header = () => {
           </button>
 
           {user && profile ? (
-            <Link to="/account" className="flex items-center gap-1.5 rounded-lg bg-secondary px-3 py-1.5">
-              <Wallet className="h-4 w-4 text-primary" />
-              <span className="text-sm font-semibold text-foreground">₦{profile.balance.toLocaleString()}</span>
-            </Link>
+            <>
+              {currentBets.length > 0 && (
+                <Link to="/my-bets" className="relative flex items-center gap-1.5 rounded-lg bg-secondary px-3 py-1.5 hover:bg-secondary/80 transition-colors">
+                  <Clock className="h-4 w-4 text-primary" />
+                  <span className="text-sm font-semibold text-foreground">{currentBets.length}</span>
+                  <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-destructive text-[10px] font-bold text-white flex items-center justify-center">
+                    {currentBets.length}
+                  </span>
+                </Link>
+              )}
+              <Link to="/account" className="flex items-center gap-1.5 rounded-lg bg-secondary px-3 py-1.5">
+                <Wallet className="h-4 w-4 text-primary" />
+                <span className="text-sm font-semibold text-foreground">₦{profile.balance.toLocaleString()}</span>
+              </Link>
+            </>
           ) : (
             <div className="flex items-center gap-2">
               <Button variant="ghost" size="sm" asChild>

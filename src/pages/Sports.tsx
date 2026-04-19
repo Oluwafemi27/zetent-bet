@@ -2,6 +2,7 @@ import Layout from "@/components/layout/Layout";
 import MatchCard from "@/components/MatchCard";
 import MatchSkeleton from "@/components/MatchSkeleton";
 import { useOdds, useSports } from "@/hooks/useOddsApi";
+import { formatGameDay } from "@/utils/formatGameDay";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
@@ -25,6 +26,7 @@ const Sports = () => {
       awayOdds: event.bookmakers?.[0]?.markets?.[0]?.outcomes?.find((o: any) => o.name === event.away_team)?.price || 2.5,
       league: event.sport_title,
       time: new Date(event.commence_time).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+      dayLabel: formatGameDay(event.commence_time),
     }))
     .filter((m: any) =>
       search ? m.homeTeam.toLowerCase().includes(search.toLowerCase()) || m.awayTeam.toLowerCase().includes(search.toLowerCase()) : true

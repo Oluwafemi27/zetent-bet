@@ -17,6 +17,7 @@ const TOPIC_IDS = liveStreamTopics.map((topic) => topic.id) as StreamTopic[];
 
 const createTopicState = <T,>(initialValue: T): Record<StreamTopic, T> => ({
   nba: initialValue,
+  soccer: initialValue,
   boxing: initialValue,
 });
 

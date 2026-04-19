@@ -13,9 +13,10 @@ interface MatchCardProps {
   league?: string;
   isLive?: boolean;
   time?: string;
+  dayLabel?: string;
 }
 
-const MatchCard = ({ id, homeTeam, awayTeam, homeLogo, awayLogo, homeOdds, drawOdds, awayOdds, league, isLive, time }: MatchCardProps) => {
+const MatchCard = ({ id, homeTeam, awayTeam, homeLogo, awayLogo, homeOdds, drawOdds, awayOdds, league, isLive, time, dayLabel }: MatchCardProps) => {
   const matchName = `${homeTeam} vs ${awayTeam}`;
 
   return (
@@ -28,7 +29,8 @@ const MatchCard = ({ id, homeTeam, awayTeam, homeLogo, awayLogo, homeOdds, drawO
               LIVE
             </Badge>
           )}
-          {time && <span className="text-xs text-muted-foreground">{time}</span>}
+          {dayLabel && <span className="text-xs text-muted-foreground">{dayLabel}</span>}
+          {!dayLabel && time && <span className="text-xs text-muted-foreground">{time}</span>}
         </div>
       </div>
 
