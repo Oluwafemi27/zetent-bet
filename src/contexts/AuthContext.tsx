@@ -25,8 +25,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState(true);
 
   const fetchProfile = async (userId: string) => {
-    const { data } = await supabase.from("profiles").select("*").eq("id", userId).single();
-    if (data) setProfile(data);
+    const { data } = await supabase.from("profiles").select("*").eq("id", userId);
+    if (data && data.length > 0) {
+      setProfile(data[0]);
+    } else {
+      // Create a default profile if it doesn't exist
+      const { data: newProfile } = await supabase
+        .from("profiles")
+        .insert({
+          id: userId,
+          full_name: "",
+          email: "",
+          balance: 0,
+          bonus_balance: 0,
+          kyc_verified: false,
+          referral_code: Math.random().toString(36).substring(2, 11).toUpperCase(),
+        })
+        .select()
+        .single();
+      if (newProfile) setProfile(newProfile);
+    }
   };
 
   useEffect(() => {
