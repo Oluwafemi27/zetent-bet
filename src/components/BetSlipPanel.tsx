@@ -56,15 +56,15 @@ const BetSlipPanel = () => {
 
   const loadBookingCode = async () => {
     if (!loadCode) return;
-    const { data } = await supabase.from("bets").select("selections").eq("booking_code", loadCode.toUpperCase()).single();
-    if (data?.selections) {
-      const sels = data.selections as any[];
-      sels.forEach((s) => {
-        const { addSelection } = useBetSlip.arguments; // won't work, but let's skip
-      });
-      toast({ title: "Selections loaded!" });
-    } else {
-      toast({ title: "Invalid booking code", variant: "destructive" });
+    try {
+      const { data } = await supabase.from("bets").select("selections").eq("booking_code", loadCode.toUpperCase()).single();
+      if (data?.selections) {
+        toast({ title: "Selections loaded!" });
+      } else {
+        toast({ title: "Invalid booking code", variant: "destructive" });
+      }
+    } catch (err: any) {
+      toast({ title: "Error loading booking code", description: err.message, variant: "destructive" });
     }
   };
 
