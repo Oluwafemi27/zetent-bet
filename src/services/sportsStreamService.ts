@@ -46,22 +46,35 @@ export async function fetchLiveStreams(query: string, maxResults = 5): Promise<L
     return [];
   }
 
-  const { data, error } = await supabase.functions.invoke("get-streams", {
-    body: {
-      query: trimmedQuery,
-      maxResults,
-    },
-  });
+  const functionUrl = import.meta.env.VITE_YOUTUBE_FUNCTION_URL || "https://wfyisqyqlijmaifunhqv.supabase.co/functions/v1/get-streams";
 
-  if (error) {
-    throw new Error(error.message || "Failed to fetch YouTube live streams");
+  try {
+    const response = await fetch(functionUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        query: trimmedQuery,
+        maxResults,
+      }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.error || `Failed to fetch YouTube live streams (${response.status})`);
+    }
+
+    const data = await response.json();
+
+    if (!data?.success) {
+      throw new Error(data?.error || "Failed to fetch YouTube live streams");
+    }
+
+    return Array.isArray(data.streams) ? data.streams : [];
+  } catch (error) {
+    throw new Error(error instanceof Error ? error.message : "Failed to fetch YouTube live streams");
   }
-
-  if (!data?.success) {
-    throw new Error(data?.error || "Failed to fetch YouTube live streams");
-  }
-
-  return Array.isArray(data.streams) ? data.streams : [];
 }
 
 export function fetchTopicStreams(topic: StreamTopic, maxResults = 5) {
