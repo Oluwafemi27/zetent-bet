@@ -116,6 +116,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
         if (session?.user) {
           await fetchProfile(session.user.id);
+        } else {
+          setProfile(null);
         }
       } catch (error) {
         console.error("Error initializing auth:", error);
