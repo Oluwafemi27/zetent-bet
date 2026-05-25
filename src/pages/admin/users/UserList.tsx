@@ -6,20 +6,12 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Search, Download, Eye, Lock, MoreVertical, Users as UsersIcon, TrendingUp } from "lucide-react";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 
 interface User {
   id: string;
   full_name: string;
   email: string;
   balance: number;
-  kyc_verified: boolean;
   created_at: string;
 }
 
@@ -30,7 +22,6 @@ const UserList: React.FC = () => {
   const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
-  const [kycFilter, setKycFilter] = useState<"all" | "verified" | "pending">("all");
   const { toast } = useToast();
 
   useEffect(() => {
@@ -39,7 +30,7 @@ const UserList: React.FC = () => {
 
   useEffect(() => {
     filterUsers();
-  }, [searchTerm, kycFilter, users]);
+  }, [searchTerm, users]);
 
   const loadUsers = async () => {
     try {
@@ -65,12 +56,6 @@ const UserList: React.FC = () => {
         (u) =>
           u.full_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
           u.email?.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-    }
-
-    if (kycFilter !== "all") {
-      filtered = filtered.filter((u) =>
-        kycFilter === "verified" ? u.kyc_verified : !u.kyc_verified
       );
     }
 
@@ -103,7 +88,7 @@ const UserList: React.FC = () => {
         {/* Filters */}
         <Card className="border border-border/50 shadow-sm">
           <CardContent className="pt-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
@@ -113,17 +98,6 @@ const UserList: React.FC = () => {
                   className="pl-10 h-10 border-primary/20 focus:border-primary/40 transition-colors"
                 />
               </div>
-
-              <Select value={kycFilter} onValueChange={(v: any) => setKycFilter(v)}>
-                <SelectTrigger className="h-10 border-primary/20 focus:border-primary/40">
-                  <SelectValue placeholder="KYC Status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Users</SelectItem>
-                  <SelectItem value="verified">KYC Verified</SelectItem>
-                  <SelectItem value="pending">Pending KYC</SelectItem>
-                </SelectContent>
-              </Select>
 
               <div className="flex gap-2">
                 <Button variant="outline" className="w-full h-10 border-primary/20 hover:border-primary/40 hover:bg-primary/5">
@@ -157,7 +131,6 @@ const UserList: React.FC = () => {
                     <th className="px-6 py-4 text-left font-semibold text-muted-foreground">Name</th>
                     <th className="px-6 py-4 text-left font-semibold text-muted-foreground">Email</th>
                     <th className="px-6 py-4 text-left font-semibold text-muted-foreground">Balance</th>
-                    <th className="px-6 py-4 text-left font-semibold text-muted-foreground">KYC Status</th>
                     <th className="px-6 py-4 text-left font-semibold text-muted-foreground">Joined</th>
                     <th className="px-6 py-4 text-left font-semibold text-muted-foreground">Actions</th>
                   </tr>
@@ -174,17 +147,6 @@ const UserList: React.FC = () => {
                       <td className="px-6 py-4 text-muted-foreground text-sm">{user.email || "—"}</td>
                       <td className="px-6 py-4 font-mono font-semibold text-foreground">
                         ₦{Number(user.balance).toLocaleString("en-NG", { minimumFractionDigits: 2 })}
-                      </td>
-                      <td className="px-6 py-4">
-                        <span
-                          className={`text-xs px-3 py-1.5 rounded-full font-bold border ${
-                            user.kyc_verified
-                              ? "bg-green-100/30 text-green-700 border-green-200/50"
-                              : "bg-amber-100/30 text-amber-700 border-amber-200/50"
-                          }`}
-                        >
-                          {user.kyc_verified ? "✓ Verified" : "• Pending"}
-                        </span>
                       </td>
                       <td className="px-6 py-4 text-xs text-muted-foreground font-medium">
                         {new Date(user.created_at).toLocaleDateString("en-NG", {
@@ -238,10 +200,5 @@ const UserList: React.FC = () => {
     </AdminPageShell>
   );
 };
+
 export default UserList;
-/home/engine/.bashrc: line 1: syntax error near unexpected token `('
-/home/engine/.bashrc: line 1: `. /etc/profile.d/workload-containment.shn# ~/.bashrc: executed by bash(1) for non-login shells.'
-/home/engine/.bashrc: line 1: syntax error near unexpected token `('
-/home/engine/.bashrc: line 1: `. /etc/profile.d/workload-containment.shn# ~/.bashrc: executed by bash(1) for non-login shells.'
-/home/engine/.bashrc: line 1: syntax error near unexpected token `('
-/home/engine/.bashrc: line 1: `. /etc/profile.d/workload-containment.shn# ~/.bashrc: executed by bash(1) for non-login shells.'

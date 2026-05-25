@@ -23,15 +23,6 @@ const RiskAlerts = () => {
       user: "IP: 192.168.1.1",
       time: new Date(Date.now() - 30 * 60000),
       status: "pending"
-    },
-    {
-      id: 3,
-      type: "withdrawal",
-      message: "Large withdrawal pending KYC completion",
-      severity: "medium",
-      user: "User #456 (Jane Smith)",
-      time: new Date(Date.now() - 120 * 60000),
-      status: "investigating"
     }
   ]);
 
@@ -73,7 +64,7 @@ const RiskAlerts = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Medium Risk</p>
-                <p className="text-2xl font-bold text-amber-600">2</p>
+                <p className="text-2xl font-bold text-amber-600">1</p>
               </div>
               <AlertTriangle className="h-8 w-8 text-amber-600 opacity-20" />
             </div>
@@ -84,7 +75,7 @@ const RiskAlerts = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Investigating</p>
-                <p className="text-2xl font-bold text-blue-600">1</p>
+                <p className="text-2xl font-bold text-blue-600">0</p>
               </div>
               <Search className="h-8 w-8 text-blue-600 opacity-20" />
             </div>
@@ -134,3 +125,15 @@ const RiskAlerts = () => {
 };
 
 export default RiskAlerts;
+/home/engine/.bashrc: line 1: syntax error near unexpected token `('
+/home/engine/.bashrc: line 1: `. /etc/profile.d/workload-containment.shn# ~/.bashrc: executed by bash(1) for non-login shells.'
+/home/engine/.bashrc: line 1: syntax error near unexpected token `('
+/home/engine/.bashrc: line 1: `. /etc/profile.d/workload-containment.shn# ~/.bashrc: executed by bash(1) for non-login shells.'
+/home/engine/.bashrc: line 1: syntax error near unexpected token `('
+/home/engine/.bashrc: line 1: `. /etc/profile.d/workload-containment.shn# ~/.bashrc: executed by bash(1) for non-login shells.'
+/home/engine/.bashrc: line 1: syntax error near unexpected token `('
+/home/engine/.bashrc: line 1: `. /etc/profile.d/workload-containment.shn# ~/.bashrc: executed by bash(1) for non-login shells.'
+/home/engine/.bashrc: line 1: syntax error near unexpected token `('
+/home/engine/.bashrc: line 1: `. /etc/profile.d/workload-containment.shn# ~/.bashrc: executed by bash(1) for non-login shells.'
+/home/engine/.bashrc: line 1: syntax error near unexpected token `('
+/home/engine/.bashrc: line 1: `. /etc/profile.d/workload-containment.shn# ~/.bashrc: executed by bash(1) for non-login shells.'

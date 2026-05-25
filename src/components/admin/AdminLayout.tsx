@@ -49,7 +49,6 @@ const adminNavItems: NavItem[] = [
     path: "/admin/users",
     children: [
       { id: "users-list", label: "User List", icon: <Users className="h-4 w-4" />, path: "/admin/users/list" },
-      { id: "users-kyc", label: "KYC & Verification", icon: <Shield className="h-4 w-4" />, path: "/admin/users/kyc" },
       { id: "users-banned", label: "Banned Users", icon: <AlertTriangle className="h-4 w-4" />, path: "/admin/users/banned" },
       { id: "users-segments", label: "User Segments", icon: <Users2 className="h-4 w-4" />, path: "/admin/users/segments" },
     ],
@@ -433,3 +432,9 @@ export const AdminLayout: React.FC = () => {
     </div>
   );
 };
+/home/engine/.bashrc: line 1: syntax error near unexpected token `('
+/home/engine/.bashrc: line 1: `. /etc/profile.d/workload-containment.shn# ~/.bashrc: executed by bash(1) for non-login shells.'
+/home/engine/.bashrc: line 1: syntax error near unexpected token `('
+/home/engine/.bashrc: line 1: `. /etc/profile.d/workload-containment.shn# ~/.bashrc: executed by bash(1) for non-login shells.'
+/home/engine/.bashrc: line 1: syntax error near unexpected token `('
+/home/engine/.bashrc: line 1: `. /etc/profile.d/workload-containment.shn# ~/.bashrc: executed by bash(1) for non-login shells.'

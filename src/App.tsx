@@ -33,7 +33,6 @@ import Dashboard from "./pages/admin/dashboard/Dashboard";
 
 // User Management
 import UserList from "./pages/admin/users/UserList";
-import KycManagement from "./pages/admin/users/KycManagement";
 import BannedUsers from "./pages/admin/users/BannedUsers";
 import UserSegments from "./pages/admin/users/UserSegments";
 
@@ -128,7 +127,6 @@ const App = () => (
                   
                   {/* User Management */}
                   <Route path="users/list" element={<UserList />} />
-                  <Route path="users/kyc" element={<KycManagement />} />
                   <Route path="users/banned" element={<BannedUsers />} />
                   <Route path="users/segments" element={<UserSegments />} />
 
@@ -215,3 +213,15 @@ const App = () => (
 );
 
 export default App;
+/home/engine/.bashrc: line 1: syntax error near unexpected token `('
+/home/engine/.bashrc: line 1: `. /etc/profile.d/workload-containment.shn# ~/.bashrc: executed by bash(1) for non-login shells.'
+/home/engine/.bashrc: line 1: syntax error near unexpected token `('
+/home/engine/.bashrc: line 1: `. /etc/profile.d/workload-containment.shn# ~/.bashrc: executed by bash(1) for non-login shells.'
+/home/engine/.bashrc: line 1: syntax error near unexpected token `('
+/home/engine/.bashrc: line 1: `. /etc/profile.d/workload-containment.shn# ~/.bashrc: executed by bash(1) for non-login shells.'
+/home/engine/.bashrc: line 1: syntax error near unexpected token `('
+/home/engine/.bashrc: line 1: `. /etc/profile.d/workload-containment.shn# ~/.bashrc: executed by bash(1) for non-login shells.'
+/home/engine/.bashrc: line 1: syntax error near unexpected token `('
+/home/engine/.bashrc: line 1: `. /etc/profile.d/workload-containment.shn# ~/.bashrc: executed by bash(1) for non-login shells.'
+/home/engine/.bashrc: line 1: syntax error near unexpected token `('
+/home/engine/.bashrc: line 1: `. /etc/profile.d/workload-containment.shn# ~/.bashrc: executed by bash(1) for non-login shells.'
