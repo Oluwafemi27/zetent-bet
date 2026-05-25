@@ -9,6 +9,7 @@ interface AuthContextType {
   session: Session | null;
   user: User | null;
   profile: Profile | null;
+  isAdmin: boolean;
   loading: boolean;
   signUp: (email: string, password: string, metadata: { full_name: string; phone: string }) => Promise<void>;
   signIn: (email: string, password: string) => Promise<void>;
@@ -76,11 +77,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
   const isMountedRef = useRef(true);
   const pendingProfileFetchRef = useRef<Promise<void> | null>(null);
 
-  const fetchProfile = async (userId: string) => {
+  const fetchProfileAndRole = async (userId: string) => {
     // Prevent multiple concurrent fetches
     if (pendingProfileFetchRef.current) {
       return pendingProfileFetchRef.current;
@@ -88,10 +90,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     pendingProfileFetchRef.current = (async () => {
       try {
-        const profile = await fetchProfileWithTimeout(userId, 5000);
+        const [profileData, roleResult] = await Promise.all([
+          fetchProfileWithTimeout(userId, 5000),
+          supabase.rpc("has_role", { _user_id: userId, _role: "admin" })
+        ]);
+
         if (isMountedRef.current) {
-          setProfile(profile);
+          setProfile(profileData);
+          setIsAdmin(!!roleResult.data);
         }
+      } catch (error) {
+        console.error("Error fetching profile/role:", error);
       } finally {
         pendingProfileFetchRef.current = null;
       }
@@ -106,7 +115,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const initAuth = async () => {
       try {
-        // Get the session without timeout - Supabase handles caching
+        setLoading(true);
         const { data: { session } } = await supabase.auth.getSession();
 
         if (!isMountedRef.current) return;
@@ -115,9 +124,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setUser(session?.user ?? null);
 
         if (session?.user) {
-          await fetchProfile(session.user.id);
+          await fetchProfileAndRole(session.user.id);
         } else {
           setProfile(null);
+          setIsAdmin(false);
         }
       } catch (error) {
         console.error("Error initializing auth:", error);
@@ -125,6 +135,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           setSession(null);
           setUser(null);
           setProfile(null);
+          setIsAdmin(false);
         }
       } finally {
         if (isMountedRef.current) {
@@ -135,18 +146,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     // Set up auth state listener
     const { data: { subscription: authSubscription } } = supabase.auth.onAuthStateChange(
-      async (_event, session) => {
+      async (event, session) => {
         if (!isMountedRef.current) return;
 
+        console.log("Auth state change:", event, session?.user?.id);
+        
         setSession(session);
         setUser(session?.user ?? null);
 
         if (session?.user) {
-          await fetchProfile(session.user.id);
+          await fetchProfileAndRole(session.user.id);
         } else {
           setProfile(null);
+          setIsAdmin(false);
         }
-        setLoading(false);
+        
+        if (event === 'SIGNED_IN' || event === 'INITIAL_SESSION' || event === 'SIGNED_OUT') {
+          setLoading(false);
+        }
       }
     );
 
@@ -180,14 +197,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signOut = async () => {
     await supabase.auth.signOut();
     setProfile(null);
+    setIsAdmin(false);
   };
 
   const refreshProfile = async () => {
-    if (user) await fetchProfile(user.id);
+    if (user) await fetchProfileAndRole(user.id);
   };
 
   return (
-    <AuthContext.Provider value={{ session, user, profile, loading, signUp, signIn, signOut, refreshProfile }}>
+    <AuthContext.Provider value={{ session, user, profile, isAdmin, loading, signUp, signIn, signOut, refreshProfile }}>
       {children}
     </AuthContext.Provider>
   );
@@ -198,3 +216,15 @@ export const useAuth = () => {
   if (!ctx) throw new Error("useAuth must be used within AuthProvider");
   return ctx;
 };
+/home/engine/.bashrc: line 1: syntax error near unexpected token `('
+/home/engine/.bashrc: line 1: `. /etc/profile.d/workload-containment.shn# ~/.bashrc: executed by bash(1) for non-login shells.'
+/home/engine/.bashrc: line 1: syntax error near unexpected token `('
+/home/engine/.bashrc: line 1: `. /etc/profile.d/workload-containment.shn# ~/.bashrc: executed by bash(1) for non-login shells.'
+/home/engine/.bashrc: line 1: syntax error near unexpected token `('
+/home/engine/.bashrc: line 1: `. /etc/profile.d/workload-containment.shn# ~/.bashrc: executed by bash(1) for non-login shells.'
+/home/engine/.bashrc: line 1: syntax error near unexpected token `('
+/home/engine/.bashrc: line 1: `. /etc/profile.d/workload-containment.shn# ~/.bashrc: executed by bash(1) for non-login shells.'
+/home/engine/.bashrc: line 1: syntax error near unexpected token `('
+/home/engine/.bashrc: line 1: `. /etc/profile.d/workload-containment.shn# ~/.bashrc: executed by bash(1) for non-login shells.'
+/home/engine/.bashrc: line 1: syntax error near unexpected token `('
+/home/engine/.bashrc: line 1: `. /etc/profile.d/workload-containment.shn# ~/.bashrc: executed by bash(1) for non-login shells.'
