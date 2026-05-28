@@ -1,8 +1,5 @@
 project_id = "wfyisqyqlijmaifunhqv"
 
-[functions.get-api-keys]
-verify_jwt = false
-
 [functions.get-fixtures]
 verify_jwt = false
 

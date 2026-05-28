@@ -34,7 +34,7 @@ const createMinimalProfile = (userId: string): Profile => ({
   is_staff: false,
 });
 
-// Fetch profile with timeout
+// Fetch profile with timeout and error resilience
 const fetchProfileWithTimeout = async (userId: string, timeoutMs = 5000): Promise<Profile> => {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
@@ -73,6 +73,18 @@ const fetchProfileWithTimeout = async (userId: string, timeoutMs = 5000): Promis
   }
 };
 
+// Check admin role with resilience against unauthenticated calls
+const checkAdminRole = async (userId: string, profileIsAdmin: boolean | null): Promise<boolean> => {
+  if (profileIsAdmin) return true;
+  try {
+    const { data } = await supabase.rpc("has_role", { _user_id: userId, _role: "admin" });
+    return !!data;
+  } catch (error) {
+    console.warn("Error checking admin role, falling back to profile flag:", error);
+    return !!profileIsAdmin;
+  }
+};
+
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
@@ -92,14 +104,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     pendingProfileFetchRef.current = (async () => {
       try {
         console.log("Fetching profile and role for:", userId);
-        const [profileData, roleResult] = await Promise.all([
-          fetchProfileWithTimeout(userId, 5000),
-          supabase.rpc("has_role", { _user_id: userId, _role: "admin" })
-        ]);
+        const profileData = await fetchProfileWithTimeout(userId, 5000);
+        const isUserAdmin = await checkAdminRole(userId, profileData?.is_admin);
 
         if (isMountedRef.current) {
           setProfile(profileData);
-          setIsAdmin(!!roleResult.data || !!profileData?.is_admin);
+          setIsAdmin(isUserAdmin);
         }
       } catch (error) {
         console.error("Error fetching profile/role:", error);
@@ -114,60 +124,72 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     isMountedRef.current = true;
 
-    // Set a safety timeout to ensure loading is eventually set to false
+    // Safety timeout: set loading to false after 3s max to prevent infinite loading
     const safetyTimeoutId = setTimeout(() => {
       if (isMountedRef.current && loading) {
         console.warn("Auth initialization timed out, forcing loading to false");
         setLoading(false);
+        initializedRef.current = true;
       }
-    }, 2000);
+    }, 3000);
 
-    // Set up auth state listener first
-    let authSubscription: any = null;
-    try {
-      const { data } = supabase.auth.onAuthStateChange(
-        async (event, currentSession) => {
-          if (!isMountedRef.current) return;
+    let authSubscription: { unsubscribe: () => void } | null = null;
 
-          console.log("Auth state change:", event, currentSession?.user?.id);
-          
-          setSession(currentSession);
-          setUser(currentSession?.user ?? null);
+    // Step 1: Get the initial session first (from localStorage persistence)
+    // This is the primary initialization path - we rely on this, not the onAuthStateChange INITIAL_SESSION
+    supabase.auth.getSession().then(({ data: { session: initialSession } }) => {
+      if (!isMountedRef.current) return;
 
-          if (currentSession?.user) {
-            await fetchProfileAndRole(currentSession.user.id);
-          } else {
-            setProfile(null);
-            setIsAdmin(false);
-          }
-          
-          // We set loading false on these key events
-          if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'INITIAL_SESSION' || event === 'SIGNED_OUT') {
+      console.log("Auth: got initial session", initialSession?.user?.id);
+
+      setSession(initialSession);
+      setUser(initialSession?.user ?? null);
+
+      if (initialSession?.user) {
+        // Fetch profile asynchronously, but set loading=false after profile is done
+        fetchProfileAndRole(initialSession.user.id).finally(() => {
+          if (isMountedRef.current && !initializedRef.current) {
             setLoading(false);
             initializedRef.current = true;
           }
+        });
+      } else {
+        if (isMountedRef.current && !initializedRef.current) {
+          setProfile(null);
+          setIsAdmin(false);
+          setLoading(false);
+          initializedRef.current = true;
         }
-      );
-      authSubscription = data.subscription;
-    } catch (error) {
-      console.error("Error setting up auth state change listener:", error);
-      if (isMountedRef.current) {
+      }
+    }).catch((error) => {
+      console.error("Auth: getSession error", error);
+      if (isMountedRef.current && !initializedRef.current) {
+        setSession(null);
+        setUser(null);
+        setProfile(null);
+        setIsAdmin(false);
         setLoading(false);
         initializedRef.current = true;
       }
-    }
+    });
 
-    // Initialize auth by getting the current session
+    // Step 2: Set up auth state listener for subsequent changes (login/logout/token refresh)
+    // We do NOT rely on INITIAL_SESSION from this listener to prevent double-fetching
     try {
-      supabase.auth.getSession().then(({ data: { session: initialSession } }) => {
+      const { data } = supabase.auth.onAuthStateChange((event, currentSession) => {
         if (!isMountedRef.current) return;
 
-        setSession(initialSession);
-        setUser(initialSession?.user ?? null);
+        // Ignore the INITIAL_SESSION event since we already handled it via getSession()
+        if (event === 'INITIAL_SESSION') return;
 
-        if (initialSession?.user) {
-          fetchProfileAndRole(initialSession.user.id).finally(() => {
-            if (isMountedRef.current) {
+        console.log("Auth state change:", event, currentSession?.user?.id);
+
+        setSession(currentSession);
+        setUser(currentSession?.user ?? null);
+
+        if (currentSession?.user) {
+          fetchProfileAndRole(currentSession.user.id).then(() => {
+            if (isMountedRef.current && !initializedRef.current) {
               setLoading(false);
               initializedRef.current = true;
             }
@@ -175,25 +197,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         } else {
           setProfile(null);
           setIsAdmin(false);
-          if (isMountedRef.current) {
+          if (isMountedRef.current && !initializedRef.current) {
             setLoading(false);
             initializedRef.current = true;
           }
         }
-      }).catch((error) => {
-        console.error("Error initializing auth session:", error);
-        if (isMountedRef.current) {
-          setSession(null);
-          setUser(null);
-          setProfile(null);
-          setIsAdmin(false);
-          setLoading(false);
-          initializedRef.current = true;
-        }
       });
+      authSubscription = data.subscription;
     } catch (error) {
-      console.error("Error calling getSession:", error);
-      if (isMountedRef.current) {
+      console.error("Error setting up auth state change listener:", error);
+      if (isMountedRef.current && !initializedRef.current) {
         setLoading(false);
         initializedRef.current = true;
       }
