@@ -65,10 +65,15 @@ export const DepositModal = ({ isOpen, onClose }: DepositModalProps) => {
         throw new Error("Failed to initiate payment");
       }
     } catch (error: any) {
-      console.error("Deposit error:", error);
+      console.error("Deposit error details:", {
+        message: error.message,
+        details: error.details,
+        hint: error.hint,
+        context: error
+      });
       toast({
         title: "Deposit failed",
-        description: error.message || "An unexpected error occurred",
+        description: error.message || "An unexpected error occurred. Please try again.",
         variant: "destructive",
       });
     } finally {

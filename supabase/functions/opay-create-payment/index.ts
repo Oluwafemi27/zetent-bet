@@ -4,6 +4,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
 };
 
 serve(async (req) => {
@@ -48,9 +49,16 @@ serve(async (req) => {
     const OPAY_PUBLIC_KEY = Deno.env.get('OPAY_PUBLIC_KEY');
     const OPAY_SECRET_KEY = Deno.env.get('OPAY_SECRET_KEY');
     const OPAY_BASE_URL = Deno.env.get('OPAY_BASE_URL') || 'https://testapi.opaycheckout.com/api/v1';
+
+    console.log('OPay configuration check:', {
+      hasMerchantId: !!OPAY_MERCHANT_ID,
+      hasPublicKey: !!OPAY_PUBLIC_KEY,
+      hasSecretKey: !!OPAY_SECRET_KEY,
+      baseUrl: OPAY_BASE_URL,
+    });
     
     if (!OPAY_MERCHANT_ID || !OPAY_PUBLIC_KEY || !OPAY_SECRET_KEY) {
-      console.error('Missing OPay configuration');
+      console.error('Missing OPay configuration - one or more required credentials are not set');
       return new Response(JSON.stringify({ error: 'Payment gateway configuration missing' }), {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -101,19 +109,47 @@ serve(async (req) => {
       productDesc: "Bet Hub Pro Wallet Deposit",
     };
 
-    console.log('Sending request to OPay:', opayPayload);
+    console.log('Sending request to OPay:', JSON.stringify({ ...opayPayload, publicKey: '***', merchantId: OPAY_MERCHANT_ID }));
 
-    const response = await fetch(`${OPAY_BASE_URL}/cashier/create`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${OPAY_SECRET_KEY}`,
-      },
-      body: JSON.stringify(opayPayload),
-    });
+    let response;
+    try {
+      response = await fetch(`${OPAY_BASE_URL}/cashier/create`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${OPAY_SECRET_KEY}`,
+        },
+        body: JSON.stringify(opayPayload),
+      });
+    } catch (fetchError) {
+      console.error('Network error calling OPay API:', {
+        message: fetchError.message,
+        cause: fetchError.cause,
+      });
+      return new Response(JSON.stringify({ error: `Failed to connect to payment gateway: ${fetchError.message}` }), {
+        status: 502,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
 
-    const data = await response.json();
-    console.log('OPay response:', data);
+    console.log('OPay HTTP response status:', response.status, response.statusText);
+
+    let data;
+    try {
+      data = await response.json();
+    } catch (parseError) {
+      const textBody = await response.text();
+      console.error('Failed to parse OPay response as JSON:', {
+        status: response.status,
+        body: textBody.substring(0, 1000),
+      });
+      return new Response(JSON.stringify({ error: 'Invalid response from payment gateway' }), {
+        status: 502,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    console.log('OPay response data:', JSON.stringify({ ...data, publicKey: '***' }));
 
     if (data.code !== '00000') {
       console.error('OPay error details:', data);
@@ -129,8 +165,12 @@ serve(async (req) => {
     });
 
   } catch (error) {
-    console.error('Unexpected error in opay-create-payment:', error);
-    return new Response(JSON.stringify({ error: error.message }), {
+    console.error('Unexpected error in opay-create-payment:', {
+      message: error.message,
+      stack: error.stack,
+      context: error,
+    });
+    return new Response(JSON.stringify({ error: error.message || 'Internal server error' }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
