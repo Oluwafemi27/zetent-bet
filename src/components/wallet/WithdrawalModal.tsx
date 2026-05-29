@@ -94,10 +94,15 @@ export const WithdrawalModal = ({ isOpen, onClose, balance }: WithdrawalModalPro
       });
       onClose();
     } catch (error: any) {
-      console.error("Withdrawal error:", error);
+      console.error("Withdrawal error details:", {
+        message: error.message,
+        details: error.details,
+        hint: error.hint,
+        context: error
+      });
       toast({
         title: "Withdrawal failed",
-        description: error.message || "An unexpected error occurred",
+        description: error.message || "An unexpected error occurred. Please try again.",
         variant: "destructive",
       });
     } finally {

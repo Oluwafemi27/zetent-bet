@@ -4,6 +4,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
 };
 
 serve(async (req) => {
@@ -44,7 +45,7 @@ serve(async (req) => {
 
     if (!reference) {
       console.error('No reference found in webhook payload');
-      return new Response(JSON.stringify({ error: 'No reference found' }), { status: 400 });
+      return new Response(JSON.stringify({ error: 'No reference found' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
 
     // Process successful transactions
@@ -70,9 +71,9 @@ serve(async (req) => {
         console.error('RPC Error:', rpcError);
         // If the transaction is already completed, the RPC returns false, which is fine
         if (rpcError.message.includes('already completed')) {
-            return new Response(JSON.stringify({ success: true, message: 'Already processed' }), { status: 200 });
+            return new Response(JSON.stringify({ success: true, message: 'Already processed' }), { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
         }
-        return new Response(JSON.stringify({ error: rpcError.message }), { status: 500 });
+        return new Response(JSON.stringify({ error: rpcError.message }), { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
       }
 
       console.log(`Transaction ${reference} processed. Success: ${success}`);
@@ -103,8 +104,12 @@ serve(async (req) => {
     });
 
   } catch (error) {
-    console.error('Unexpected error in webhook:', error);
-    return new Response(JSON.stringify({ error: error.message }), { 
+    console.error('Unexpected error in opay-webhook:', {
+      message: error.message,
+      stack: error.stack,
+      context: error,
+    });
+    return new Response(JSON.stringify({ error: error.message || 'Internal server error' }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     });
