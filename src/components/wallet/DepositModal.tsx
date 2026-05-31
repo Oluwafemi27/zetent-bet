@@ -13,11 +13,11 @@ interface DepositModalProps {
 }
 
 interface VirtualAccountInfo {
-  accountNumber: string;
+  bankAccountNumber: string;
   bankName: string;
-  accountName: string;
-  amount: number;
-  expirySeconds: number;
+  bankAccountName: string;
+  amount: string | number;
+  expiresIn: number;
 }
 
 export const DepositModal = ({ isOpen, onClose }: DepositModalProps) => {
@@ -50,42 +50,42 @@ export const DepositModal = ({ isOpen, onClose }: DepositModalProps) => {
 
     setIsLoading(true);
     try {
-      const { data, error } = await supabase.functions.invoke("opay-create-payment", {
-        body: { amount: depositAmount },
-      });
+      const { data: { user } } = await supabase.auth.getUser();
 
-      if (error) {
-        // Handle FunctionsHttpError - extract the actual error body from the response
-        let errorMessage = error.message;
-        try {
-          const errorBody = await error.context?.json();
-          if (errorBody?.error) {
-            errorMessage = errorBody.error;
-          }
-        } catch {
-          // If we can't parse the context, use the default error message
+      if (!user) {
+        throw new Error("User not found");
+      }
+
+      const response = await fetch(
+        'https://wfyisqyqlijmaifunhqv.supabase.co/functions/v1/opay-create-payment',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            amount: depositAmount,
+            userId: user.id,
+            userEmail: user.email,
+            userName: user.user_metadata?.full_name || user.email
+          })
         }
-        throw new Error(errorMessage);
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Deposit failed');
       }
 
-      if (data?.virtualAccount) {
-        setVirtualAccount(data.virtualAccount);
-        setTimeLeft(data.virtualAccount.expirySeconds || 1800);
-      } else if (data?.cashierUrl) {
-        window.location.href = data.cashierUrl;
-      } else {
-        throw new Error("Failed to initiate payment");
-      }
-    } catch (error: any) {
-      console.error("Deposit error details:", {
-        message: error.message,
-        details: error.details,
-        hint: error.hint,
-        context: error
-      });
+      setVirtualAccount(data);
+      setTimeLeft(data.expiresIn || 1800);
+    } catch (error: unknown) {
+      console.error("Deposit error details:", error);
+      const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred. Please try again.";
       toast({
         title: "Deposit failed",
-        description: error.message || "An unexpected error occurred. Please try again.",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
@@ -126,7 +126,7 @@ export const DepositModal = ({ isOpen, onClose }: DepositModalProps) => {
           <div className="space-y-4 py-4">
             <div className="rounded-lg bg-primary/10 p-4 text-center">
               <p className="text-sm text-muted-foreground">Amount to Pay</p>
-              <p className="text-2xl font-bold text-primary">₦{virtualAccount.amount.toLocaleString()}</p>
+              <p className="text-2xl font-bold text-primary">₦{virtualAccount.amount}</p>
             </div>
 
             <div className="space-y-3">
@@ -143,9 +143,9 @@ export const DepositModal = ({ isOpen, onClose }: DepositModalProps) => {
               <div className="flex items-center justify-between rounded-md border p-3">
                 <div>
                   <p className="text-xs text-muted-foreground">Account Number</p>
-                  <p className="text-lg font-mono font-bold">{virtualAccount.accountNumber}</p>
+                  <p className="text-lg font-mono font-bold">{virtualAccount.bankAccountNumber}</p>
                 </div>
-                <Button variant="ghost" size="icon" onClick={() => copyToClipboard(virtualAccount.accountNumber, "Account number")}>
+                <Button variant="ghost" size="icon" onClick={() => copyToClipboard(virtualAccount.bankAccountNumber, "Account number")}>
                   <Copy className="h-4 w-4" />
                 </Button>
               </div>
@@ -153,9 +153,9 @@ export const DepositModal = ({ isOpen, onClose }: DepositModalProps) => {
               <div className="flex items-center justify-between rounded-md border p-3">
                 <div>
                   <p className="text-xs text-muted-foreground">Account Name</p>
-                  <p className="font-medium">{virtualAccount.accountName}</p>
+                  <p className="font-medium">{virtualAccount.bankAccountName}</p>
                 </div>
-                <Button variant="ghost" size="icon" onClick={() => copyToClipboard(virtualAccount.accountName, "Account name")}>
+                <Button variant="ghost" size="icon" onClick={() => copyToClipboard(virtualAccount.bankAccountName, "Account name")}>
                   <Copy className="h-4 w-4" />
                 </Button>
               </div>
@@ -167,7 +167,7 @@ export const DepositModal = ({ isOpen, onClose }: DepositModalProps) => {
             </div>
             
             <p className="text-center text-xs text-muted-foreground italic">
-              Your balance will be updated automatically once the payment is confirmed.
+              Your wallet will be credited automatically once payment is confirmed
             </p>
           </div>
         ) : (
