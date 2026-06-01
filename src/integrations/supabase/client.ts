@@ -3,19 +3,19 @@ import type { Database } from './types';
 
 // These are expected to be set in environment variables
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || "";
-const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || "";
+const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || "";
 
 // Log a warning instead of throwing to prevent app crash on load
-if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) {
+if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
   console.warn('Missing Supabase configuration. Please check your environment variables. Using placeholder values to prevent crash.');
 }
 
 // Create a flag to track if we have valid credentials
 const hasValidCredentials = !!(
   SUPABASE_URL &&
-  SUPABASE_PUBLISHABLE_KEY &&
+  SUPABASE_ANON_KEY &&
   SUPABASE_URL !== 'https://placeholder-url.supabase.co' &&
-  SUPABASE_PUBLISHABLE_KEY !== 'placeholder-key'
+  SUPABASE_ANON_KEY !== 'placeholder-key'
 );
 
 /**
@@ -26,7 +26,7 @@ const hasValidCredentials = !!(
 function createResilientClient() {
   // Validate URL format to prevent Supabase client from crashing on bad URL
   let validatedUrl = SUPABASE_URL;
-  let validatedKey = SUPABASE_PUBLISHABLE_KEY;
+  let validatedKey = SUPABASE_ANON_KEY;
 
   if (!validatedUrl || !validatedKey) {
     validatedUrl = 'https://placeholder-url.supabase.co';
@@ -94,7 +94,7 @@ function createResilientClient() {
       functions: {
         invoke: async () => ({ data: null, error: new Error('Supabase not configured') }),
       },
-    } as any;
+    } as unknown as ReturnType<typeof createClient<Database>>;
   }
 }
 

@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, ExternalLink, Copy, Clock } from "lucide-react";
+import { Loader2, ExternalLink, Copy, Clock, CheckCircle2, XCircle } from "lucide-react";
 
 interface DepositModalProps {
   isOpen: boolean;
@@ -25,6 +25,8 @@ export const DepositModal = ({ isOpen, onClose }: DepositModalProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [virtualAccount, setVirtualAccount] = useState<VirtualAccountInfo | null>(null);
   const [timeLeft, setTimeLeft] = useState(0);
+  const [reference, setReference] = useState<string | null>(null);
+  const [transactionStatus, setTransactionStatus] = useState<'pending' | 'completed' | 'failed' | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -36,6 +38,38 @@ export const DepositModal = ({ isOpen, onClose }: DepositModalProps) => {
     }
     return () => clearInterval(timer);
   }, [timeLeft]);
+
+  // Poll for transaction status when a reference is set
+  useEffect(() => {
+    if (!reference || !isOpen) return;
+
+    const pollInterval = window.setInterval(async () => {
+      try {
+        const { data, error } = await supabase
+          .from('transactions')
+          .select('status')
+          .eq('reference', reference)
+          .single();
+
+        if (error) {
+          console.error('Polling error:', error);
+          return;
+        }
+
+        if (data?.status === 'success' || data?.status === 'completed') {
+          setTransactionStatus('completed');
+          clearInterval(pollInterval);
+        } else if (data?.status === 'failed') {
+          setTransactionStatus('failed');
+          clearInterval(pollInterval);
+        }
+      } catch (err) {
+        console.error('Polling exception:', err);
+      }
+    }, 5000);
+
+    return () => clearInterval(pollInterval);
+  }, [reference, isOpen]);
 
   const handleDeposit = async () => {
     const depositAmount = parseFloat(amount);
@@ -49,25 +83,24 @@ export const DepositModal = ({ isOpen, onClose }: DepositModalProps) => {
     }
 
     setIsLoading(true);
+    setTransactionStatus(null);
     try {
       const { data: { user } } = await supabase.auth.getUser();
 
-      const response = await fetch(
-        'https://wfyisqyqlijmaifunhqv.supabase.co/functions/v1/opay-create-payment',
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            amount: amount,
-            userId: user.id,
-            userEmail: user.email,
-            userName: user.user_metadata?.full_name || user.email
-          })
-        }
-      );
+      if (!user) {
+        throw new Error('You must be logged in to make a deposit');
+      }
 
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.error || 'Deposit failed');
+      const { data, error } = await supabase.functions.invoke('opay-create-payment', {
+        body: {
+          amount: amount,
+          userId: user.id,
+          userEmail: user.email,
+          userName: user.user_metadata?.full_name || user.email
+        }
+      });
+
+      if (error) throw new Error(error.message || 'Deposit failed');
 
       // Map OPay response fields to the VirtualAccountInfo interface
       setVirtualAccount({
@@ -77,6 +110,7 @@ export const DepositModal = ({ isOpen, onClose }: DepositModalProps) => {
         amount: data.amount,
         expiresIn: 1800,
       });
+      setReference(data.reference);
       setTimeLeft(1800);
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred. Please try again.";
@@ -165,6 +199,26 @@ export const DepositModal = ({ isOpen, onClose }: DepositModalProps) => {
               <Clock className="h-4 w-4" />
               <span>Expires in: {formatTime(timeLeft)}</span>
             </div>
+            
+            {/* Transaction status indicator */}
+            {transactionStatus === null && reference && (
+              <div className="flex items-center justify-center gap-2 text-sm font-medium text-blue-600">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                <span>Waiting for payment confirmation...</span>
+              </div>
+            )}
+            {transactionStatus === 'completed' && (
+              <div className="flex items-center justify-center gap-2 rounded-md bg-green-100 p-3 text-sm font-medium text-green-700 dark:bg-green-900/30 dark:text-green-400">
+                <CheckCircle2 className="h-5 w-5" />
+                <span>Payment Confirmed! Your wallet has been credited.</span>
+              </div>
+            )}
+            {transactionStatus === 'failed' && (
+              <div className="flex items-center justify-center gap-2 rounded-md bg-red-100 p-3 text-sm font-medium text-red-700 dark:bg-red-900/30 dark:text-red-400">
+                <XCircle className="h-5 w-5" />
+                <span>Transaction Failed. Please contact support.</span>
+              </div>
+            )}
             
             <p className="text-center text-xs text-muted-foreground italic">
               Your wallet will be credited automatically once payment is confirmed

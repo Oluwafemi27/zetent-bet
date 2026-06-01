@@ -19,7 +19,6 @@ This document describes the full backend setup for NaijaBet (Lovable Cloud / Sup
 | `SUPABASE_ANON_KEY` | Auto-injected |
 | `SUPABASE_SERVICE_ROLE_KEY` | Auto-injected |
 | `SUPABASE_DB_URL` | Auto-injected |
-| `SUPABASE_PUBLISHABLE_KEY` | Auto-injected |
 
 TheSportsDB uses the public test key `123` and is called directly from edge functions (no secret needed).
 sportsrc.org and ESPN scoreboard endpoints are public (no key).
