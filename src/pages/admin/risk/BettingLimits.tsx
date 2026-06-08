@@ -80,7 +80,7 @@ const BettingLimits: React.FC = () => {
         </h1>
         <Button
           className="gap-2"
-          onClick={() => toast({ title: "New Limit dialog not yet implemented", description: "This feature is coming soon." })}
+          disabled
         >
           <Plus className="h-4 w-4" />
           New Limit
@@ -140,7 +140,7 @@ const BettingLimits: React.FC = () => {
                           size="sm"
                           variant="outline"
                           className="h-8 text-xs gap-1.5"
-                          onClick={() => toast({ title: "Edit Limit dialog not yet implemented", description: "This feature is coming soon." })}
+                          disabled
                         >
                           <Edit className="h-3.5 w-3.5" />
                           Edit

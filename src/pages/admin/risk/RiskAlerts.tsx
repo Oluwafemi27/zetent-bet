@@ -2,15 +2,8 @@ import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Search } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
 
 const RiskAlerts = () => {
-  const { toast } = useToast();
-
-  const handleFilterAlerts = () => {
-    toast({ title: "Filter Alerts dialog not yet implemented", description: "This feature is coming soon." });
-  };
-
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -18,7 +11,7 @@ const RiskAlerts = () => {
         <Button
           variant="outline"
           className="gap-2"
-          onClick={handleFilterAlerts}
+          disabled
         >
           <Search className="h-4 w-4" /> Filter Alerts
         </Button>

@@ -92,7 +92,7 @@ const RiskRules: React.FC = () => {
         <h1 className="font-display text-3xl font-bold">Risk Rules Engine</h1>
         <Button
           className="gap-2"
-          onClick={() => toast({ title: "New Rule dialog not yet implemented", description: "This feature is coming soon." })}
+          disabled
         >
           <Plus className="h-4 w-4" />
           New Rule
@@ -131,7 +131,7 @@ const RiskRules: React.FC = () => {
                     size="icon"
                     variant="ghost"
                     className="h-10 w-10"
-                    onClick={() => toast({ title: "Edit Rule dialog not yet implemented", description: "This feature is coming soon." })}
+                    disabled
                   >
                     <Edit className="h-4 w-4" />
                   </Button>

@@ -165,7 +165,7 @@ const Wallets: React.FC = () => {
                         size="sm"
                         variant="outline"
                         className="h-8 text-xs gap-1.5"
-                        onClick={() => toast({ title: "Adjust Wallet dialog not yet implemented", description: "This feature is coming soon." })}
+                        disabled
                       >
                         <Edit className="h-3.5 w-3.5" />
                         Adjust

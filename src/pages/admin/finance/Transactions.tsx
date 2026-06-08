@@ -244,7 +244,7 @@ const Transactions: React.FC = () => {
                           size="icon"
                           variant="ghost"
                           className="h-8 w-8 text-muted-foreground"
-                          onClick={() => toast({ title: "More options not yet implemented", description: "This feature is coming soon." })}
+                          disabled
                         >
                           <MoreVertical className="h-4 w-4" />
                         </Button>

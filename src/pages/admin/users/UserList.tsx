@@ -158,7 +158,7 @@ const UserList: React.FC = () => {
                 <Button
                   variant="outline"
                   className="w-full h-10 border-primary/20 hover:border-primary/40 hover:bg-primary/5"
-                  onClick={() => toast({ title: "Filter options coming soon" })}
+                  disabled
                 >
                   More Filters
                 </Button>
@@ -247,7 +247,7 @@ const UserList: React.FC = () => {
                             size="icon"
                             variant="ghost"
                             className="h-8 w-8 text-muted-foreground hover:text-foreground"
-                            onClick={() => toast({ title: "Menu options: Coming soon" })}
+                            disabled
                           >
                             <MoreVertical className="h-4 w-4" />
                           </Button>
