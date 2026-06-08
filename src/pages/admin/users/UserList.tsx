@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -19,6 +20,7 @@ interface User {
 import { AdminPageShell } from "@/components/admin/AdminPageShell";
 
 const UserList: React.FC = () => {
+  const navigate = useNavigate();
   const [users, setUsers] = useState<User[]>([]);
   const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
@@ -153,7 +155,11 @@ const UserList: React.FC = () => {
               </div>
 
               <div className="flex gap-2">
-                <Button variant="outline" className="w-full h-10 border-primary/20 hover:border-primary/40 hover:bg-primary/5">
+                <Button
+                  variant="outline"
+                  className="w-full h-10 border-primary/20 hover:border-primary/40 hover:bg-primary/5"
+                  onClick={() => toast({ title: "Filter options coming soon" })}
+                >
                   More Filters
                 </Button>
               </div>
@@ -219,6 +225,7 @@ const UserList: React.FC = () => {
                             size="sm"
                             variant="outline"
                             className="h-8 text-xs border-blue-200/50 hover:border-blue-400/50 hover:bg-blue-50/20 gap-1.5"
+                            onClick={() => navigate(`/admin/users/${user.id}`)}
                           >
                             <Eye className="h-3.5 w-3.5" />
                             View
@@ -240,6 +247,7 @@ const UserList: React.FC = () => {
                             size="icon"
                             variant="ghost"
                             className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                            onClick={() => toast({ title: "Menu options: Coming soon" })}
                           >
                             <MoreVertical className="h-4 w-4" />
                           </Button>

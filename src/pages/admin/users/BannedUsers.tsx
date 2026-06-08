@@ -182,6 +182,7 @@ const BannedUsers: React.FC = () => {
                             size="icon"
                             variant="ghost"
                             className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                            onClick={() => toast({ title: "Menu options: Coming soon" })}
                           >
                             <MoreVertical className="h-4 w-4" />
                           </Button>

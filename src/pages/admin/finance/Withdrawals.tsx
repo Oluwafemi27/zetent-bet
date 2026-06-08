@@ -194,7 +194,14 @@ const Withdrawals = () => {
                           </Button>
                         </div>
                       ) : (
-                        <Button size="sm" variant="ghost" className="h-8 text-xs">Details</Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="h-8 text-xs"
+                          onClick={() => toast({ title: `Withdrawal Details`, description: `ID: ${w.id}\nAmount: ₦${w.amount}\nAccount: ${w.bank_account}\nStatus: ${w.status}` })}
+                        >
+                          Details
+                        </Button>
                       )}
                     </td>
                   </tr>

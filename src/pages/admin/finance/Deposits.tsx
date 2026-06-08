@@ -146,10 +146,32 @@ const Deposits: React.FC = () => {
       description="Review and process user deposit transactions."
       actions={
         <div className="flex gap-2">
-          <Button variant="outline" className="gap-2">
+          <Button
+            variant="outline"
+            className="gap-2"
+            onClick={() => toast({ title: "Advanced filters coming soon" })}
+          >
             <Filter className="h-4 w-4" /> Filter
           </Button>
-          <Button className="gap-2 bg-primary">
+          <Button
+            className="gap-2 bg-primary"
+            onClick={() => {
+              const csv = [
+                ["Amount", "Reference", "Status", "Date"],
+                ...filteredDeposits.map(d => [d.amount, d.reference || "N/A", d.status, new Date(d.created_at).toLocaleString()])
+              ].map(e => e.join(",")).join("\n");
+              const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+              const link = document.createElement("a");
+              const url = URL.createObjectURL(blob);
+              link.setAttribute("href", url);
+              link.setAttribute("download", "deposits.csv");
+              link.style.visibility = 'hidden';
+              document.body.appendChild(link);
+              link.click();
+              document.body.removeChild(link);
+              toast({ title: "Exported successfully" });
+            }}
+          >
             <Download className="h-4 w-4" /> Export CSV
           </Button>
         </div>
@@ -271,7 +293,14 @@ const Deposits: React.FC = () => {
                               </Button>
                             </div>
                           ) : (
-                            <Button size="sm" variant="ghost" className="h-8 text-xs">Details</Button>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="h-8 text-xs"
+                              onClick={() => toast({ title: `Deposit Details`, description: `ID: ${deposit.id}\nAmount: ₦${deposit.amount}\nStatus: ${deposit.status}` })}
+                            >
+                              Details
+                            </Button>
                           )}
                         </td>
                       </tr>
