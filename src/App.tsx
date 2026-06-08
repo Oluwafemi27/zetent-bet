@@ -137,11 +137,9 @@ const App = () => (
                 <Route path="/my-bets" element={<MyBets />} />
                 <Route path="/bet-history" element={<BetHistory />} />
 
-                {/* Legacy Admin Redirect */}
-                <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
-
                 {/* Unified Admin Panel Routes */}
                 <Route path="/admin" element={<AdminLayout />}>
+                  <Route index element={<Navigate to="dashboard" replace />} />
                   <Route path="dashboard" element={<Dashboard />} />
                   
                   {/* User Management */}
