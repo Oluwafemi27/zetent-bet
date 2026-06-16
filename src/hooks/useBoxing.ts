@@ -1,5 +1,4 @@
 import { useQuery } from "@tanstack/react-query";
-import { isGameLiveOrUpcoming, GAMES_HOURLY_REFETCH_INTERVAL } from "@/utils/gameFilter";
 import { supabase } from "@/integrations/supabase/client";
 
 export interface BoxingEvent {
@@ -11,35 +10,41 @@ export interface BoxingEvent {
   date?: string;
   time?: string;
   timestamp?: string;
-  thumb?: string;
-  poster?: string;
-  venue?: string;
-  country?: string;
   isLive?: boolean;
 }
 
 async function fetchBoxing(): Promise<BoxingEvent[]> {
-  const { data, error } = await supabase.functions.invoke("get-boxing");
-  
-  if (error) {
-    console.error("Error invoking get-boxing function:", error);
-    return [];
-  }
+  const now = new Date().toISOString();
+  const future = new Date(Date.now() + 60 * 24 * 60 * 60 * 1000).toISOString();
 
-  return data?.events || [];
+  const { data, error } = await supabase
+    .from("matches")
+    .select("id, home_team, away_team, league, start_time, status, sport")
+    .in("sport", ["boxing", "mma"])
+    .gte("start_time", now)
+    .lte("start_time", future)
+    .not("external_id", "is", null)
+    .order("start_time", { ascending: true })
+    .limit(30);
+
+  if (error) throw error;
+
+  return (data ?? []).map((row) => ({
+    id: row.id,
+    title: `${row.home_team} vs ${row.away_team}`,
+    league: row.league ?? row.sport ?? "Boxing",
+    homeTeam: row.home_team,
+    awayTeam: row.away_team,
+    timestamp: row.start_time,
+    isLive: row.status === "live",
+  }));
 }
 
-export function useBoxing(liveOnly = false) {
+export function useBoxing(_liveOnly = false) {
   return useQuery({
-    queryKey: ["boxing", liveOnly],
+    queryKey: ["boxing-supabase"],
     queryFn: fetchBoxing,
-    staleTime: 1000 * 60 * 10,
-    refetchInterval: GAMES_HOURLY_REFETCH_INTERVAL,
-    select: (events) => {
-      // Filter to only live or upcoming games using timestamp
-      const filtered = events.filter((e) => isGameLiveOrUpcoming(e.timestamp));
-      // If liveOnly is requested, further filter to only live events
-      return liveOnly ? filtered.filter((e) => e.isLive) : filtered;
-    },
+    staleTime: 1000 * 60 * 2,
+    retry: 2,
   });
 }
