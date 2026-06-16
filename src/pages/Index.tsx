@@ -31,20 +31,8 @@ const Index = () => {
   const sportKey = activeLeague === "all" ? "soccer_epl" : activeLeague;
   const { data: odds, isLoading, error } = useOdds(sportKey);
 
-  const now = Date.now();
-  const matches = (odds || [])
-    .filter((event: any) => new Date(event.commence_time).getTime() > now - 3 * 60 * 60 * 1000)
-    .map((event: any) => ({
-      id: event.id,
-      homeTeam: event.home_team,
-      awayTeam: event.away_team,
-      homeOdds: event.bookmakers?.[0]?.markets?.[0]?.outcomes?.find((o: any) => o.name === event.home_team)?.price || 1.5,
-      drawOdds: event.bookmakers?.[0]?.markets?.[0]?.outcomes?.find((o: any) => o.name === "Draw")?.price || 3.5,
-      awayOdds: event.bookmakers?.[0]?.markets?.[0]?.outcomes?.find((o: any) => o.name === event.away_team)?.price || 2.5,
-      league: event.sport_title,
-      time: new Date(event.commence_time).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-      dayLabel: formatGameDay(event.commence_time),
-    }));
+  // odds are already mapped to MatchCard shape by useOdds hook
+  const matches = (odds || []) as any[];
 
   return (
     <Layout>
