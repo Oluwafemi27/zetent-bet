@@ -27,8 +27,8 @@ const quickLinks = [
 ];
 
 const Index = () => {
-  const [activeLeague, setActiveLeague] = useState("soccer_epl");
-  const sportKey = activeLeague === "all" ? "soccer_epl" : activeLeague;
+  const [activeLeague, setActiveLeague] = useState("all");
+  const sportKey = activeLeague;
   const { data: odds, isLoading, error } = useOdds(sportKey);
 
   // odds are already mapped to MatchCard shape by useOdds hook
